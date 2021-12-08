@@ -2,10 +2,10 @@ fn main() {
     let input = include_str!("../resources/input");
     let numbers = parse_input(input);
 
-    let moves = find_optimal_position(&numbers);
+    let moves = find_optimal_moves_1(&numbers);
     println!("[1/2] Result: {}", moves);
 
-    let moves = find_optimal_position_2(&numbers);
+    let moves = find_optimal_moves_2(&numbers);
     println!("[2/2] Result: {}", moves);
 }
 
@@ -13,7 +13,7 @@ fn parse_input(input: &str) -> Vec<i64> {
     input.trim().split(',').map(|number| number.parse::<i64>().unwrap()).collect()
 }
 
-fn find_optimal_position(numbers: &Vec<i64>) -> i64 {
+fn find_optimal_moves_1(numbers: &Vec<i64>) -> i64 {
     let mut best_moves: i64 = i64::MAX;
 
     for current in numbers {
@@ -32,7 +32,7 @@ fn find_optimal_position(numbers: &Vec<i64>) -> i64 {
     // moves
 }
 
-fn find_optimal_position_2(numbers: &Vec<i64>) -> i64 {
+fn find_optimal_moves_2(numbers: &Vec<i64>) -> i64 {
     let mut best_moves: i64 = i64::MAX;
 
     for current in numbers {
@@ -62,7 +62,7 @@ mod test {
     #[test]
     fn test_part1() {
         let numbers = parse_input(TEST_DATA);
-        let moves = find_optimal_position(&numbers);
+        let moves = find_optimal_moves_1(&numbers);
 
         assert_eq!(37, moves);
     }
@@ -70,7 +70,7 @@ mod test {
     #[test]
     fn test_part2() {
         let numbers = parse_input(TEST_DATA);
-        let moves = find_optimal_position_2(&numbers);
+        let moves = find_optimal_moves_2(&numbers);
         assert_eq!(170, moves);
     }
 }
