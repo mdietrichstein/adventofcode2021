@@ -6,20 +6,35 @@ const END_NODE: &str = "end";
 
 fn main() {
     let input = include_str!("../resources/input");
-    let paths = find_paths(input);
+    let paths = find_paths(input, false);
     println!("[1/2] Result: {}", paths.len());
+
+    let paths = find_paths(input, true);
+    println!("[2/2] Result: {}", paths.len());
 }
 
 fn is_lowercase(value: &str) -> bool {
     value.to_lowercase() == value
 }
 
-fn visit_node<'a>(node: &'a str, mut visited: Vec<&'a str>, connections: &HashMap<&'a str, HashSet<&'a str>>, paths: &mut Vec<Vec<&'a str>>) {
+fn visit_node<'a>(
+    node: &'a str,
+    mut visited: Vec<&'a str>,
+    connections: &HashMap<&'a str, HashSet<&'a str>>,
+    paths: &mut Vec<Vec<&'a str>>,
+    allow_single_exception: bool,
+) {
     visited.push(node);
 
     for child in &connections[node] {
+        let mut allow_single_exception = allow_single_exception;
+
         if is_lowercase(child) && visited.contains(&child) {
-            continue;
+            if allow_single_exception {
+                allow_single_exception = false;
+            } else {
+                continue;
+            }
         }
 
         if *child == END_NODE {
@@ -29,18 +44,21 @@ fn visit_node<'a>(node: &'a str, mut visited: Vec<&'a str>, connections: &HashMa
             continue;
         }
 
-        visit_node(child, visited.clone(), connections, paths);
+        visit_node(child, visited.clone(), connections, paths, allow_single_exception);
     }
 }
 
-fn find_paths(input: &str) -> Vec<Vec<&str>> {
+fn find_paths(input: &str, allow_single_exception: bool) -> Vec<Vec<&str>> {
     let mut connections: HashMap<&str, HashSet<&str>> = HashMap::new();
 
     input.trim().split('\n')
         .map(|line| line.trim().split_once('-').unwrap())
         .for_each(|(a, b)| {
             let nodes = connections.entry(a).or_default();
-            nodes.insert(b);
+
+            if a != END_NODE && b != START_NODE {
+                nodes.insert(b);
+            }
 
             let nodes = connections.entry(b).or_default();
 
@@ -51,8 +69,8 @@ fn find_paths(input: &str) -> Vec<Vec<&str>> {
 
     let mut paths: Vec<Vec<&str>> = vec![];
 
-    let mut visited: Vec<&str> = vec![];
-    visit_node(START_NODE, visited, &connections, &mut paths);
+    let visited: Vec<&str> = vec![];
+    visit_node(START_NODE, visited, &connections, &mut paths, allow_single_exception);
 
     paths
 }
@@ -60,8 +78,6 @@ fn find_paths(input: &str) -> Vec<Vec<&str>> {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::{HashMap, HashSet};
-
     use crate::find_paths;
 
     const TEST_DATA_SMALL: &str = "
@@ -110,12 +126,15 @@ mod tests {
 
     #[test]
     pub fn test_part1() {
-        find_paths(TEST_DATA_MEDIUM);
-        assert_eq!(10, find_paths(TEST_DATA_SMALL).len());
-        assert_eq!(19, find_paths(TEST_DATA_MEDIUM).len());
-        assert_eq!(226, find_paths(TEST_DATA_LARGE).len());
+        assert_eq!(10, find_paths(TEST_DATA_SMALL, false).len());
+        assert_eq!(19, find_paths(TEST_DATA_MEDIUM, false).len());
+        assert_eq!(226, find_paths(TEST_DATA_LARGE, false).len());
     }
 
     #[test]
-    pub fn test_part2() {}
+    pub fn test_part2() {
+        assert_eq!(36, find_paths(TEST_DATA_SMALL, true).len());
+        assert_eq!(103, find_paths(TEST_DATA_MEDIUM, true).len());
+        assert_eq!(3509, find_paths(TEST_DATA_LARGE, true).len());
+    }
 }
