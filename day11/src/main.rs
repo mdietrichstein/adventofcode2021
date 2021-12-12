@@ -5,11 +5,14 @@ mod map;
 fn main() {
     let input = include_str!("../resources/input");
 
-    let num_flashes = count_flashes(input);
+    let (_step, num_flashes) = count_flashes(input, false);
     println!("[1/2] Result: {}", num_flashes);
+
+    let (step, _num_flashes) = count_flashes(input, true);
+    println!("[2/2] Result: {}", step + 1);
 }
 
-fn count_flashes(input: &str) -> usize {
+fn count_flashes(input: &str, stop_when_all_flash: bool) -> (usize, usize) {
     let mut map = Map::new(input);
     let mut positions_to_check: Vec<usize> = vec![];
 
@@ -17,7 +20,12 @@ fn count_flashes(input: &str) -> usize {
 
     // println!("Before any steps:\n-------------------\n{}\n-------------------\n\n", map);
 
-    let num_steps = 100;
+    let num_steps = if stop_when_all_flash {
+        5000
+    } else {
+        100
+    };
+
     for step in 0..num_steps {
         for i in 0..map.len() {
             map[i] += 1;
@@ -43,17 +51,26 @@ fn count_flashes(input: &str) -> usize {
             }
         }
 
+        let mut num_step_flashes = 0;
+
         for i in 0..map.len() {
             if map[i] >= 10 {
-                num_flashes += 1;
+                num_step_flashes += 1;
                 map[i] = 0;
             }
+        }
+
+        num_flashes += num_step_flashes;
+
+        if stop_when_all_flash && num_step_flashes == map.len() {
+            println!("After step {}:\n-------------------\n{}\n-------------------\n\n", step + 1, map);
+            return (step, num_flashes);
         }
 
         // println!("After step {}:\n-------------------\n{}\n-------------------\n\n", step + 1, map);
     }
 
-    num_flashes
+    (num_steps - 1, num_flashes)
 }
 
 #[cfg(test)]
@@ -75,10 +92,13 @@ mod tests {
 
     #[test]
     fn test_part1() {
-        let num_flashes = count_flashes(TEST_DATA);
+        let (_step, num_flashes) = count_flashes(TEST_DATA, false);
         assert_eq!(1656, num_flashes);
     }
 
     #[test]
-    fn test_part2() {}
+    fn test_part2() {
+        let (step, _num_flashes) = count_flashes(TEST_DATA, true);
+        assert_eq!(195, step + 1);
+    }
 }
