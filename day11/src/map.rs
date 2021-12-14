@@ -73,7 +73,7 @@ impl Map {
             for column in 0..NEIGHBORHOOD_SIZE {
                 let neighborhoods_index = (NEIGHBORHOOD_SIZE * row + column) as usize;
                 let map_row = current_row + row as i64 - 1;
-                let map_column = (current_column + column as i64 - 1);
+                let map_column = current_column + column as i64 - 1;
 
                 if map_column < 0 || map_row < 0 || map_column >= self.num_columns as i64 || map_row >= self.num_rows as i64 {
                     indices[neighborhoods_index] = None;
