@@ -95,8 +95,11 @@ impl BitReader {
     fn update_state(&mut self) {
         if self.remaining_bits == 0 {
             self.remaining_bits = 8;
-            self.byte_offset += 1;
-            self.current_byte = self.bytes[self.byte_offset];
+
+            if self.byte_offset + 1 < self.bytes.len() {
+                self.byte_offset += 1;
+                self.current_byte = self.bytes[self.byte_offset];
+            }
         }
     }
 }
